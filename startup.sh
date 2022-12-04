@@ -49,6 +49,7 @@ function forwardPort() {
 }
 
 sysctl -w net.ipv4.ip_forward=1
+forwardPort tcp 58846
 forwardPort tcp 25565
 forwardPort tcp 25569
 forwardPort udp 19132

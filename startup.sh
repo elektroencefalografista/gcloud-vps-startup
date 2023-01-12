@@ -31,14 +31,16 @@ function createSwap {
 }
 
 function installFirewallcmd {
-    if [[ $OS_ID == "debian" ]]; then apt install -y firewalld; fi
-    if [[ $OS_ID == "opensuse-leap" ]]; then zypper install -y firewalld && systemctl enable --now firewalld; fi
+    apt --version && apt install -y firewalld
+    dnf --version && dnf install -y firewalld
+    zypper --version && zypper install -y firewalld
+    systemctl enable --now firewalld
 }
 
 function installPodman {
-    if [[ $OS_ID == "debian" ]]; then apt install -y podman; fi
-    if [[ $OS_ID == "fedora" ]]; then dnf install -y podman; fi
-    if [[ $OS_ID == "opensuse-leap" ]]; then zypper install -y podman; fi
+    apt --version && apt install -y podman
+    dnf --version && dnf install -y podman
+    zypper --version && zypper install -y podman
 }
 
 function setupZerotier {

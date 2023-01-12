@@ -20,7 +20,7 @@ function forwardPort() {
 function createSwap {
     if [[ ! -f /var/swap ]]; then 
         echo "CREATING SWAP"
-        dd if=/dev/zero of=/var/swap bs=4M count=768
+        dd if=/dev/zero of=/var/swap bs=4M count=384
         chmod 0600 /var/swap
         mkswap /var/swap
     fi
@@ -39,6 +39,21 @@ function installPodman {
     apt --version && apt install -y podman
     dnf --version && dnf install -y podman
     zypper --version && zypper install -y podman
+}
+
+function installGsutil {
+    tee -a /etc/zypp/repos.d/google-cloud-sdk.repo << EOM
+        [google-cloud-sdk]
+        name=Google Cloud SDK
+        baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el7-x86_64
+        enabled=1
+        gpgcheck=1
+        repo_gpgcheck=1
+        gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+               https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOM
+    zypper install -y google-cloud-sdk
+
 }
 
 function setupZerotier {
@@ -65,9 +80,9 @@ if [[ $(swapon | wc -l) -eq 0 ]]; then createSwap; fi
 apt --version && apt update
 firewall-cmd --version || installFirewallcmd
 podman --version || installPodman
+gsutil --version || installGsutil
 
 setupZerotier
-
 
 firewall-cmd --zone=$ZONE --add-masquerade
 forwardPort tcp 58846

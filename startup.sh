@@ -1,12 +1,11 @@
 #!/bin/bash
+# this is a very dumb script. but it works
 if [[ $(whoami) != 'root' ]]; then echo "not root, exiting"; exit; fi # only really needed for firewall-cmd
 OS_ID=$(cat /etc/os-release | grep ^ID | cut -f2 -d "=")
 ZONE=$(cat /etc/firewalld/firewalld.conf | grep DefaultZone | cut -d "=" -f2) # could be trusted or public
 if [[ $(sysctl net.ipv4.ip_forward -n) != 1 ]]; then sysctl -w net.ipv4.ip_forward=1; fi
 
 function forwardPort() {
-    ## PORT FORWARDING
-    
     PROTO=$1
     PORT_IN=$2
     PORT_OUT=$3
@@ -15,19 +14,18 @@ function forwardPort() {
     echo "FORWARDING PORT $PORT_IN TO $IP_OUT:$PORT_OUT"
 
     firewall-cmd --zone=$ZONE --add-port=$PORT_IN/$PROTO
-    firewall-cmd --zone=$ZONE --add-masquerade
     firewall-cmd --zone=$ZONE --add-forward-port=port=$PORT_IN:proto=$PROTO:toport=$PORT_OUT:toaddr=$IP_OUT
 }
 
 function createSwap {
-        if [[ ! -f /var/swap ]]; then 
-            echo "CREATING SWAP"
-            dd if=/dev/zero of=/var/swap bs=4M count=768
-            chmod 0600 /var/swap
-            mkswap /var/swap
-        fi
-        echo "ENABLING SWAP"
-        swapon /var/swap
+    if [[ ! -f /var/swap ]]; then 
+        echo "CREATING SWAP"
+        dd if=/dev/zero of=/var/swap bs=4M count=768
+        chmod 0600 /var/swap
+        mkswap /var/swap
+    fi
+    echo "ENABLING SWAP"
+    swapon /var/swap
 }
 
 function installFirewallcmd {
@@ -64,16 +62,16 @@ function setupZerotier {
 
 
 if [[ $(swapon | wc -l) -eq 0 ]]; then createSwap; fi
-exit
-if [[ $OS_ID == "debian" ]]; then apt update; fi
+apt --version && apt update; fi
 firewall-cmd --version || installFirewallcmd
 podman --version || installPodman
 
+setupZerotier
 
+
+firewall-cmd --zone=$ZONE --add-masquerade
 forwardPort tcp 58846
 forwardPort tcp 25565
 forwardPort tcp 25569
 forwardPort udp 19132
 forwardPort tcp 8081
-
-setupZerotier

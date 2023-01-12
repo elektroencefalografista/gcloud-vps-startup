@@ -52,7 +52,7 @@ function installGsutil {
         gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
                https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOM
-    zypper install -y google-cloud-sdk
+     zypper --gpg-auto-import-keys install -y google-cloud-sdk
 
 }
 

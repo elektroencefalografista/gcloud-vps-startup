@@ -62,7 +62,7 @@ function setupZerotier {
 
 
 if [[ $(swapon | wc -l) -eq 0 ]]; then createSwap; fi
-apt --version && apt update; fi
+apt --version && apt update
 firewall-cmd --version || installFirewallcmd
 podman --version || installPodman
 

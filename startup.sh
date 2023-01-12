@@ -64,6 +64,7 @@ firewall-cmd --version || installFirewallcmd
 podman --version || installPodman
 
 
+forwardPort tcp 58846
 forwardPort tcp 25565
 forwardPort tcp 25569
 forwardPort udp 19132

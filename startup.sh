@@ -22,7 +22,7 @@ function forwardPort() {
 function createSwap {
         if [[ ! -f /var/swap ]]; then 
             echo "CREATING SWAP"
-            dd if=/dev/zero of=/var/swap bs=4M count=512
+            dd if=/dev/zero of=/var/swap bs=4M count=768
             chmod 0600 /var/swap
             mkswap /var/swap
         fi
@@ -32,10 +32,13 @@ function createSwap {
 
 function installFirewallcmd {
     if [[ $OS_ID == "debian" ]]; then apt install -y firewalld; fi
+    if [[ $OS_ID == "opensuse-leap" ]]; then zypper install -y firewalld && systemctl enable --now firewalld; fi
 }
 
 function installPodman {
     if [[ $OS_ID == "debian" ]]; then apt install -y podman; fi
+    if [[ $OS_ID == "fedora" ]]; then dnf install -y podman; fi
+    if [[ $OS_ID == "opensuse-leap" ]]; then zypper install -y podman; fi
 }
 
 function setupZerotier {
@@ -59,6 +62,7 @@ function setupZerotier {
 
 
 if [[ $(swapon | wc -l) -eq 0 ]]; then createSwap; fi
+exit
 if [[ $OS_ID == "debian" ]]; then apt update; fi
 firewall-cmd --version || installFirewallcmd
 podman --version || installPodman

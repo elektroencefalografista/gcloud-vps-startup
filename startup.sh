@@ -88,5 +88,6 @@ firewall-cmd --zone=$ZONE --add-masquerade
 forwardPort tcp 58846
 forwardPort tcp 25565
 forwardPort tcp 25569
+forwardPort tcp 42069
 forwardPort udp 19132
 forwardPort tcp 8081

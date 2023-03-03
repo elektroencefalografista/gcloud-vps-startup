@@ -91,3 +91,5 @@ forwardPort tcp 25569
 forwardPort tcp 42069
 forwardPort udp 19132
 forwardPort tcp 8081
+forwardPort tcp 8081
+forwardPort tcp 18525 22

@@ -86,7 +86,9 @@ setupZerotier
 
 firewall-cmd --zone=$ZONE --add-masquerade
 forwardPort tcp 58846
-forwardPort tcp 25565 25565 192.168.196.46
+# forwardPort tcp 25565
+firewall-cmd --zone=$ZONE --add-port=25565/tcp
+firewall-cmd --zone=$ZONE --add-forward-port=port=25565:proto=tcp:toport=25565:toaddr=192.168.196.46
 forwardPort tcp 25569
 forwardPort tcp 42069
 forwardPort udp 19132

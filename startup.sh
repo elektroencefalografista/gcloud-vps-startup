@@ -1,59 +1,21 @@
 #!/bin/bash
 # this is a very dumb script. but it works
-if [[ $(whoami) != 'root' ]]; then echo "not root, exiting"; exit; fi # only really needed for firewall-cmd
-OS_ID=$(cat /etc/os-release | grep ^ID | cut -f2 -d "=")
-ZONE=$(cat /etc/firewalld/firewalld.conf | grep DefaultZone | cut -d "=" -f2) # could be trusted or public
+if [[ $(whoami) != 'root' ]]; then echo "not root, exiting"; exit; fi
 if [[ $(sysctl net.ipv4.ip_forward -n) != 1 ]]; then sysctl -w net.ipv4.ip_forward=1; fi
 
+function prepForwarding() {
+	nft add table ip nat
+	nft -- add chain ip nat prerouting { type nat hook prerouting priority -100 \; }
+	nft add chain ip nat postrouting { type nat hook postrouting priority 100 \; }
+    for ip in $@; do 
+        nft add rule ip nat postrouting ip daddr $ip masquerade
+        echo "SET UP MASQUERADING FOR $ip"
+    done
+}
+
 function forwardPort() {
-    PROTO=$1
-    PORT_IN=$2
-    PORT_OUT=$3
-    if [[ -z $PORT_OUT ]]; then PORT_OUT=$PORT_IN; fi
-    IP_OUT=192.168.196.200
-    echo "FORWARDING PORT $PORT_IN TO $IP_OUT:$PORT_OUT"
-
-    firewall-cmd --zone=$ZONE --add-port=$PORT_IN/$PROTO
-    firewall-cmd --zone=$ZONE --add-forward-port=port=$PORT_IN:proto=$PROTO:toport=$PORT_OUT:toaddr=$IP_OUT
-}
-
-function createSwap {
-    if [[ ! -f /var/swap ]]; then 
-        echo "CREATING SWAP"
-        dd if=/dev/zero of=/var/swap bs=4M count=384
-        chmod 0600 /var/swap
-        mkswap /var/swap
-    fi
-    echo "ENABLING SWAP"
-    swapon /var/swap
-}
-
-function installFirewallcmd {
-    apt --version && apt install -y firewalld
-    dnf --version && dnf install -y firewalld
-    zypper --version && zypper install -y firewalld
-    systemctl enable --now firewalld
-}
-
-function installPodman {
-    apt --version && apt install -y podman
-    dnf --version && dnf install -y podman
-    zypper --version && zypper install -y podman
-}
-
-function installGsutil {
-    tee -a /etc/zypp/repos.d/google-cloud-sdk.repo << EOM
-        [google-cloud-sdk]
-        name=Google Cloud SDK
-        baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el7-x86_64
-        enabled=1
-        gpgcheck=1
-        repo_gpgcheck=1
-        gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
-               https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-EOM
-     zypper --gpg-auto-import-keys install -y google-cloud-sdk
-
+    echo "FORWARDING PORT $2/$1 TO $3"
+	nft add rule ip nat prerouting $1 dport $2 dnat to $3
 }
 
 function setupZerotier {
@@ -76,22 +38,17 @@ function setupZerotier {
 }
 
 
-if [[ $(swapon | wc -l) -eq 0 ]]; then createSwap; fi
-apt --version && apt update
-firewall-cmd --version || installFirewallcmd
-podman --version || installPodman
-gsutil --version || installGsutil
+podman ps -a | grep zerotier || setupZerotier
+nft --version || apt update || apt install nftables -y
 
-setupZerotier
+SERWER=192.168.196.200
+# PI=192.168.196.201
 
-firewall-cmd --zone=$ZONE --add-masquerade
-forwardPort tcp 58846
-forwardPort tcp 25565
-# firewall-cmd --zone=$ZONE --add-port=25565/tcp
-# firewall-cmd --zone=$ZONE --add-forward-port=port=25565:proto=tcp:toport=25565:toaddr=192.168.196.46
-forwardPort tcp 25569
-forwardPort tcp 42069
-forwardPort udp 19132
-forwardPort tcp 8081
-forwardPort tcp 8081
-forwardPort tcp 18525 22
+prepForwarding $SERWER $PI
+forwardPort tcp 58846 $SERWER   # deluge
+forwardPort tcp 25565 $SERWER   # minecraft #1
+forwardPort tcp 25569 $SERWER   # minecraft #2
+forwardPort tcp 42069 $SERWER   # minecraft #3
+forwardPort udp 19132 $SERWER   # minecraft bedrock
+forwardPort tcp 8081 $SERWER    # komga
+forwardPort tcp 18525 $SERWER:22 # ssh

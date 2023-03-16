@@ -42,7 +42,7 @@ podman ps -a | grep zerotier || setupZerotier
 nft --version || apt update || apt install nftables -y
 
 SERWER=192.168.196.200
-PI=192.168.196.201
+PI=192.168.196.224
 
 prepForwarding $SERWER $PI
 forwardPort tcp 3000 $PI

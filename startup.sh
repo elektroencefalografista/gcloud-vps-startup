@@ -45,7 +45,7 @@ SERWER=192.168.196.200
 PI=192.168.196.224
 
 prepForwarding $SERWER $PI
-forwardPort tcp 80 $PI:3000 
+forwardPort tcp 9090 $PI
 forwardPort tcp 58846 $SERWER   # deluge
 forwardPort tcp 25565 $SERWER   # minecraft #1
 forwardPort tcp 25569 $SERWER   # minecraft #2

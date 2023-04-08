@@ -48,6 +48,7 @@ prepForwarding $SERWER $PI
 forwardPort tcp 9090 $PI
 forwardPort tcp 58846 $SERWER   # deluge
 forwardPort tcp 25565 $SERWER   # minecraft #1
+forwardPort tcp 25566 $SERWER   # minecraft #1
 forwardPort tcp 25569 $SERWER   # minecraft #2
 forwardPort tcp 42069 $SERWER   # minecraft #3
 forwardPort udp 19132 $SERWER   # minecraft bedrock

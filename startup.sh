@@ -54,3 +54,6 @@ forwardPort tcp 42069 $SERWER   # minecraft #3
 forwardPort udp 19132 $SERWER   # minecraft bedrock
 forwardPort tcp 8081 $SERWER    # komga
 forwardPort tcp 18525 $SERWER:22 # ssh
+forwardPort tcp 80 $SERWER:9661  # nexcloud na serwer
+forwardPort tcp 443 $SERWER:9662 # nextcloud https
+

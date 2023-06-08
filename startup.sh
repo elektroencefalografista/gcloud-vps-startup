@@ -41,7 +41,7 @@ function setupZerotier {
 podman ps -a | grep zerotier || setupZerotier
 nft --version || apt update || apt install nftables -y
 
-SERWER=192.168.196.200
+SERWER=ts-server
 
 prepForwarding $SERWER
 forwardPort tcp 58846 $SERWER   # deluge

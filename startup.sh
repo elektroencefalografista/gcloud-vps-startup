@@ -38,7 +38,7 @@ function setupZerotier {
 }
 
 
-podman ps -a | grep zerotier || setupZerotier
+# podman ps -a | grep zerotier || setupZerotier
 nft --version || apt update || apt install nftables -y
 
 SERWER=ts-server

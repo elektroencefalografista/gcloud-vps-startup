@@ -41,10 +41,11 @@ function setupZerotier {
 # podman ps -a | grep zerotier || setupZerotier
 nft --version || apt update || apt install nftables -y
 
-SERWER=ts-server
+SERWER=server
 
 prepForwarding $SERWER
 forwardPort tcp 58846 $SERWER   # deluge
+forwardPort tcp 25564 $SERWER 
 forwardPort tcp 25565 $SERWER   # minecraft #1
 forwardPort tcp 25566 $SERWER   # minecraft #1
 forwardPort tcp 25569 $SERWER   # minecraft #2
